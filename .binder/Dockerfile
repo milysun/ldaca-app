@@ -1,2 +1,2 @@
-# BinderHub-compatible Dockerfile for LDaCA Project - Change to trigger rebuild
+# BinderHub-compatible Dockerfile for LDaCA Project
 FROM milysun/ldaca-binder:latest
