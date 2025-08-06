@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+
+echo "🔧 BinderHub postBuild setup for LDaCA..."
+
+# Ensure all files are executable
+chmod +x /usr/local/bin/start-ldaca.sh
+
+# Create symlinks for easier access
+ln -sf /app/ldaca_web_app ${HOME}/ldaca_web_app
+
+echo "✅ BinderHub setup complete!"

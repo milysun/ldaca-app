@@ -1,0 +1,5 @@
+name: ldaca-binder
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
