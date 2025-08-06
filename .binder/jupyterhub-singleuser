@@ -1,7 +1,0 @@
-#!/bin/bash
-# Simple wrapper that starts our application and keeps the container alive
-
-echo "🎭 Starting LDaCA for BinderHub..."
-
-# Execute our startup script
-exec /usr/local/bin/start-notebook.sh
