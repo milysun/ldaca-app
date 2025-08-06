@@ -11,7 +11,7 @@ ENV HOME=/home/${NB_USER}
 # Switch to root to make system changes
 USER root
 
-# Install additional packages that BinderHub might need
+# Install minimal BinderHub requirements
 RUN apt-get update && apt-get install -y \
     tini \
     sudo \
@@ -24,27 +24,33 @@ RUN usermod -l ${NB_USER} app && \
     mkdir -p ${HOME} && \
     chown -R ${NB_USER}:${NB_USER} ${HOME}
 
-# Give jovyan sudo access (BinderHub requirement)
+# Give jovyan user sudo access for BinderHub
 RUN echo "${NB_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-# Update nginx configuration to listen on port 8080 (BinderHub proxy requirement)
+# Configure nginx to listen on port 8080 for BinderHub
 RUN sed -i 's/listen 443/listen 8080/g' /etc/nginx/sites-available/default && \
     sed -i 's/listen \[::\]:443/listen [::]:8080/g' /etc/nginx/sites-available/default
 
-# Copy BinderHub-specific configuration files
+# Copy BinderHub configuration files
 COPY .binder/supervisord-binder.conf /etc/supervisor/conf.d/supervisord.conf
 COPY .binder/start /usr/local/bin/start-ldaca.sh
+COPY .binder/start-notebook.sh /usr/local/bin/start-notebook.sh
+COPY .binder/jupyterhub-singleuser /usr/local/bin/jupyterhub-singleuser
 COPY .binder/postBuild /usr/local/bin/postBuild
 
 # Make scripts executable
 RUN chmod +x /usr/local/bin/start-ldaca.sh && \
+    chmod +x /usr/local/bin/start-notebook.sh && \
+    chmod +x /usr/local/bin/jupyterhub-singleuser && \
     chmod +x /usr/local/bin/postBuild
 
-# Set proper permissions for BinderHub
+# Set up proper permissions and directories for BinderHub
 RUN chown -R ${NB_USER}:${NB_USER} /app && \
     mkdir -p /tmp/supervisor && \
     chown -R ${NB_USER}:${NB_USER} /tmp/supervisor && \
-    chmod -R 755 /app
+    chmod -R 755 /app && \
+    mkdir -p ${HOME}/.jupyter && \
+    chown -R ${NB_USER}:${NB_USER} ${HOME}
 
 # Run postBuild setup
 RUN /usr/local/bin/postBuild
@@ -58,4 +64,4 @@ EXPOSE 8080
 
 # Set the entrypoint that BinderHub expects
 ENTRYPOINT ["tini", "-g", "--"]
-CMD ["/usr/local/bin/start-ldaca.sh"]
+CMD ["/usr/local/bin/start-notebook.sh"]
