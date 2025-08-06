@@ -1,8 +1,7 @@
 #!/bin/bash
-# Wrapper script that replaces jupyterhub-singleuser 
-# This makes BinderHub think it's starting Jupyter but actually starts LDaCA
+# Simple wrapper that starts our application and keeps the container alive
 
-echo "🎭 BinderHub expects Jupyter, but launching LDaCA instead..."
+echo "🎭 Starting LDaCA for BinderHub..."
 
-# Start LDaCA web application on the port BinderHub expects
-exec /usr/local/bin/start-ldaca.sh
+# Execute our startup script
+exec /usr/local/bin/start-notebook.sh
