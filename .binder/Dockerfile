@@ -1,4 +1,4 @@
-FROM milysun/ldaca-binder:latest # update
+FROM milysun/ldaca-binder:latest
 
 # Ensure the startup script is executable
 USER root
