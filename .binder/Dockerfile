@@ -33,7 +33,7 @@ RUN mkdir -p /home/jovyan/.jupyter && printf 'import os\nc = get_config()\nc.Ser
 RUN mkdir -p /home/jovyan/work && printf '# LDaCA Web Application\n\nThis BinderHub instance provides access to the **Language Data Commons of Australia (LDaCA)** web application.\n\n**Open Welcome_to_LDaCA.ipynb to get started!**\n\n## Quick Access Links\n- [🌐 LDaCA Web App](../proxy/443/) - Main application interface\n- [📚 API Documentation](../proxy/8001/api/docs) - Backend API documentation\n- [🔍 API Health Check](../proxy/8001/api/health) - Check API status\n\n## Architecture\n- **Frontend**: React app served by Nginx on port 443\n- **Backend**: FastAPI on port 8001\n- **Database**: SQLite with initialization scripts\n- **Jupyter**: This environment on port 8888\n\nThe application uses supervisor to manage multiple services (nginx, fastapi, db-init).\n' > /home/jovyan/work/README.md
 
 # Copy the comprehensive Welcome notebook
-COPY Welcome_to_LDaCA.ipynb /home/jovyan/Welcome_to_LDaCA.ipynb
+COPY .binder/Welcome_to_LDaCA.ipynb /home/jovyan/Welcome_to_LDaCA.ipynb
 
 # Set ownership
 RUN chown -R jovyan:jovyan /home/jovyan
