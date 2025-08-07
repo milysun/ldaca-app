@@ -1,29 +1,12 @@
 #!/bin/bash
-set -euo pipefail
+set -e
 
-echo "🔧 BinderHub postBuild setup for LDaCA Web Application..."
+echo "� PostBuild: Setting up LDaCA for BinderHub"
 
-# Ensure all files are executable
-chmod +x /usr/local/bin/start-ldaca.sh
-chmod +x /usr/local/bin/start-notebook.sh
-chmod +x /usr/local/bin/jupyterhub-singleuser
+# Start the LDaCA services in background
+echo "🔄 Starting LDaCA services launcher..."
+/usr/local/bin/start-ldaca-services.sh &
 
-# Create symlinks for easier access
-ln -sf /app/ldaca_web_app ${HOME}/ldaca_web_app
-
-# Create a simple index page to redirect to the app
-cat > ${HOME}/index.html << 'EOF'
-<!DOCTYPE html>
-<html>
-<head>
-    <title>LDaCA - Redirecting...</title>
-    <meta http-equiv="refresh" content="0; url=/proxy/8080/">
-</head>
-<body>
-    <h1>🚀 Starting LDaCA Application...</h1>
-    <p>You will be redirected automatically. If not, <a href="/proxy/8080/">click here</a>.</p>
-</body>
-</html>
-EOF
-
-echo "✅ BinderHub setup complete - will serve LDaCA web application!"
+echo "✅ PostBuild: LDaCA service launcher started in background"
+echo "� Services will be available in ~15 seconds after Jupyter starts"
+echo "🌐 Check /tmp/ldaca-startup.log for service status"
