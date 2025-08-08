@@ -1,2 +1,2 @@
 #
-FROM milysun/ldaca-binder:latest
+FROM milysun/ldaca-app:latest
