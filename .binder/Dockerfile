@@ -1,2 +1,2 @@
 #
-FROM milysun/ldaca-app:latest
+FROM milysun/ldaca-app:step1
