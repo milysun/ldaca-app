@@ -1,10 +1,29 @@
 #!/bin/bash
+
+echo "🚀 PostBuild: Simple LDaCA setup"
+
+# Create directories and files needed
+mkdir -p /home/jovyan/work/logs
+touch /home/jovyan/work/logs/ldaca-startup.log
+
+# Create a marker that LDaCA should start
+touch /home/jovyan/.ldaca-start-marker
+
+# Make sure the service script is executable (if it exists)
+if [ -f "/usr/local/bin/start-ldaca-services.sh" ]; then
+    chmod +x /usr/local/bin/start-ldaca-services.sh
+fi
+
+echo "✅ PostBuild: Setup complete"
+exit 0h
 set -e
 
-echo "🔧 PostBuild: Configuring environment..."
+echo "� PostBuild: Setting up LDaCA for BinderHub"
 
-# Ensure correct permissions
-chmod +x /usr/local/bin/start-ldaca-services.sh 2>/dev/null || true
-chmod +x /usr/local/bin/start.sh 2>/dev/null || true
+# Start the LDaCA services in background
+echo "🔄 Starting LDaCA services launcher..."
+/usr/local/bin/start-ldaca-services.sh &
 
-echo "✅ PostBuild: Configuration complete"
+echo "✅ PostBuild: LDaCA service launcher started in background"
+echo "� Services will be available in ~15 seconds after Jupyter starts"
+echo "🌐 Check /tmp/ldaca-startup.log for service status"
