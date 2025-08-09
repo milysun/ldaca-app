@@ -110,14 +110,7 @@ NGINX
 mkdir -p "$HOME/nginx/www"
 cp -r "$HOME/www"/* "$HOME/nginx/www/" 2>/dev/null || true
 
-# Ensure jupyter-server-proxy is enabled (repo2docker base usually has it)
-python - <<'PY'
-try:
-    from jupyter_server.extension.serverextension import toggle_serverextension_python
-except Exception:
-    # Older Jupyter
-    from notebook.nbextensions import enable_nbextension
-print("jupyter-server-proxy assumed installed")
-PY
+# Skip explicit Jupyter extension enabling (not needed and breaks on Jupyter Server v2+)
+echo "postBuild: skipping jupyter extension enabling; jupyter-server-proxy will be available if installed."
 
 chmod +x "$PWD/start"
