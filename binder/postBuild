@@ -4,17 +4,18 @@ set -euo pipefail
 # Ensure we are in repo root
 cd "$(dirname "$0")/.."
 
-# Install backend (editable) to pull deps and expose console scripts if any
-if [ -d "ldaca_web_app/backend" ]; then
-  pip install -e ldaca_web_app/backend
-fi
+# Do NOT install backend as an editable package here; we rely on PYTHONPATH set in start
+# to import backend/docframe/docworkspace from the repo. Runtime deps are installed via environment.yml.
+# if [ -d "ldaca_web_app/backend" ]; then
+#   pip install -e ldaca_web_app/backend
+# fi
 
 # Build frontend if present
 if [ -f "ldaca_web_app/frontend/package.json" ]; then
   pushd ldaca_web_app/frontend
   # Prefer reproducible installs; fall back to npm install on CI cache miss
   npm ci || npm install
-  npm run build
+  CI=false npm run build
   popd
   # Copy build to user-space web dir for nginx
   mkdir -p "$HOME/www"
