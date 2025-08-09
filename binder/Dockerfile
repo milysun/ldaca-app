@@ -1,7 +1,6 @@
 # Github Action Built Image
-FROM milysun/ldaca-app:e54beae66b9e
+FROM milysun/ldaca-app:3f60e0d2c7fc
 
-# Run as the notebook user and launch our startup script
+# Auto-run start script to launch backend/frontend and then Jupyter
 USER jovyan
 ENTRYPOINT ["/bin/bash", "-lc", "start"]
-
