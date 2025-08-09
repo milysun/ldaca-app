@@ -1,2 +1,2 @@
 # 5
-FROM milysun/ldaca-binder:step3
+FROM milysun/ldaca-binder:latest
