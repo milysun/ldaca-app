@@ -13,8 +13,12 @@ cd "$(dirname "$0")/.."
 # Build frontend if present
 if [ -f "ldaca_web_app/frontend/package.json" ]; then
   pushd ldaca_web_app/frontend
-  # Prefer reproducible installs; fall back to npm install on CI cache miss
-  npm ci || npm install
+  # Use npm ci only when a lockfile exists, else fallback to npm install
+  if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+    npm ci || npm install
+  else
+    npm install
+  fi
   CI=false npm run build
   popd
   # Copy build to user-space web dir for nginx
@@ -32,14 +36,17 @@ else
 HTML
 fi
 
+# Prepare nginx prefix directories (user-space)
+mkdir -p "$HOME/nginx/logs" "$HOME/nginx/run" "$HOME/nginx/tmp" \
+         "$HOME/nginx/tmp/client_body" "$HOME/nginx/tmp/proxy_temp" \
+         "$HOME/nginx/tmp/fastcgi_temp" "$HOME/nginx/tmp/uwsgi_temp" \
+         "$HOME/nginx/tmp/scgi_temp"
+
 # Write a user-space nginx configuration (no root privileges required)
-mkdir -p "$HOME/nginx/logs" "$HOME/nginx/run"
 cat > "$HOME/nginx/nginx.conf" <<'NGINX'
 worker_processes  1;
 error_log  logs/error.log warn;
 pid        run/nginx.pid;
-
-# NGINX will chroot to this prefix when -p is supplied; all paths below are relative to that prefix
 
 events {
   worker_connections  1024;
@@ -49,6 +56,14 @@ http {
   include       /etc/nginx/mime.types;
   default_type  application/octet-stream;
 
+  # All temp paths under user prefix
+  client_body_temp_path tmp/client_body;
+  proxy_temp_path       tmp/proxy_temp;
+  fastcgi_temp_path     tmp/fastcgi_temp;
+  uwsgi_temp_path       tmp/uwsgi_temp;
+  scgi_temp_path        tmp/scgi_temp;
+
+  access_log    logs/access.log;
   sendfile        on;
   keepalive_timeout  65;
 
