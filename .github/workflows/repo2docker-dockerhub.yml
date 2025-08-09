@@ -45,9 +45,15 @@ jobs:
 
     - name: Update binder/Dockerfile to new image tag
       run: |
-        echo "# Github Action Built Image" > binder/Dockerfile
-        echo "FROM $IMAGE_REF" >> binder/Dockerfile
-        echo "Updated binder/Dockerfile to use $IMAGE_REF"
+        {
+          echo "# Github Action Built Image"
+          echo "FROM $IMAGE_REF"
+          echo
+          echo "# Auto-run start script to launch backend/frontend and then Jupyter"
+          echo "USER jovyan"
+          echo "ENTRYPOINT [\"/bin/bash\", \"-lc\", \"start\"]"
+        } > binder/Dockerfile
+        echo "Updated binder/Dockerfile to use $IMAGE_REF and auto-run start"
 
     - name: Commit binder/Dockerfile
       uses: EndBug/add-and-commit@v9
