@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# User-space startup script for Binder (repo root)
+# - Starts FastAPI backend (uvicorn) on 127.0.0.1:8001
+# - Starts nginx serving frontend on 8080 and proxying /api -> 8001
+# - Delegates to Jupyter singleuser process provided by Binder
+
+# Ensure working directory is repo root
+cd "$(dirname "$0")"
+
+# PYTHONPATH so backend imports docframe/docworkspace in this repo
+export PYTHONPATH="$PWD:$PWD/docframe:$PWD/docworkspace:$PWD/ldaca_web_app/backend:$PYTHONPATH"
+
+# Backend: run uvicorn in background
+if [ -f "ldaca_web_app/backend/main.py" ]; then
+  # Use the backend's config settings if present
+  (
+    cd ldaca_web_app/backend
+    uvicorn main:app --host 127.0.0.1 --port 8001 --log-level info &
+    echo $! > "$HOME/uvicorn.pid"
+  )
+fi
+
+# Nginx: user-space instance with prefix $HOME/nginx
+if command -v nginx >/dev/null 2>&1; then
+  mkdir -p "$HOME/nginx/logs" "$HOME/nginx/run"
+  # Ensure content is present under the configured prefix
+  mkdir -p "$HOME/nginx/www"
+  cp -r "$HOME/www"/* "$HOME/nginx/www/" 2>/dev/null || true
+  nginx -p "$HOME/nginx" -c "$HOME/nginx/nginx.conf" &
+  echo $! > "$HOME/nginx.pid"
+fi
+
+# Finally exec the Jupyter singleuser server (Binder injects the command/args)
+exec "$@"

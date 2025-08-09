@@ -1,2 +1,3 @@
-# ldaca-app
-Fullstack implementation of LDaCa text analytic tools.
+# LDaCA - Language Data Commons of Australia
+
+run `bash run.sh` to start the LDaCA ecosystem, which includes the backend server and frontend development server.
