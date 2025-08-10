@@ -1,5 +1,5 @@
 # Github Action Built Image
-FROM milysun/ldaca-app:7980190025cb
+FROM milysun/ldaca-app:2dd1bf70e1ef
 
 # Copy notebooks into the image so they appear in Binder
 USER root
