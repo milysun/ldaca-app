@@ -19,14 +19,6 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Optionally convert README to index.ipynb
-      run: |
-        python -m pip install -U pip jupytext jupyterlab
-        if [ -f README.md ]; then
-          sed '/^<\!-- START RUN INFO/,/^<\!-- END RUN INFO/d;' README.md > index.md || cp README.md index.md
-          jupytext -k python3 --to ipynb index.md || true
-        fi
-
     - name: Build and push with repo2docker (Docker Hub)
       id: r2d
       uses: jupyterhub/repo2docker-action@master
@@ -43,15 +35,22 @@ jobs:
         echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
         echo "IMAGE_REF=${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:$SHORT_SHA" >> $GITHUB_ENV
 
-    - name: Update binder/Dockerfile to new image tag
+    - name: Update FROM tag in binder/Dockerfile (preserve COPY lines)
       run: |
-        echo "# Github Action Built Image" > binder/Dockerfile
-        echo "FROM $IMAGE_REF" >> binder/Dockerfile
-        echo "Updated binder/Dockerfile to use $IMAGE_REF"
+        if [ -f binder/Dockerfile ]; then
+          # Replace only the first FROM line with the new image ref
+          sed -E -i '1,/^FROM / s|^FROM .*$|FROM '"$IMAGE_REF"'|' binder/Dockerfile
+          echo "Updated FROM in binder/Dockerfile to $IMAGE_REF"
+        else
+          echo "# Github Action Built Image" > binder/Dockerfile
+          echo "FROM $IMAGE_REF" >> binder/Dockerfile
+          # Optionally add COPY lines if you want to scaffold here
+          echo "Created binder/Dockerfile with FROM $IMAGE_REF"
+        fi
 
     - name: Commit binder/Dockerfile
       uses: EndBug/add-and-commit@v9
       with:
         add: binder/Dockerfile
-        message: "chore: update Binder base image"
+        message: "chore: update Binder base image tag"
         default_author: github_actions
