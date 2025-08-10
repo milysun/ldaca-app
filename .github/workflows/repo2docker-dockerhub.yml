@@ -19,6 +19,14 @@ jobs:
       with:
         python-version: '3.11'
 
+    - name: Back up and remove binder/Dockerfile for CI build
+      run: |
+        if [ -f binder/Dockerfile ]; then
+          echo "Backing up binder/Dockerfile then removing for CI build so repo2docker copies repo contents"
+          cp binder/Dockerfile binder/Dockerfile.ci.bak
+          rm -f binder/Dockerfile
+        fi
+
     - name: Build and push with repo2docker (Docker Hub)
       id: r2d
       uses: jupyterhub/repo2docker-action@master
@@ -35,18 +43,17 @@ jobs:
         echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
         echo "IMAGE_REF=${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:$SHORT_SHA" >> $GITHUB_ENV
 
-    - name: Update FROM tag in binder/Dockerfile (preserve COPY lines)
+    - name: Restore binder/Dockerfile and update FROM tag (preserve COPY lines)
       run: |
-        if [ -f binder/Dockerfile ]; then
-          # Replace only the first FROM line with the new image ref
-          sed -E -i '1,/^FROM / s|^FROM .*$|FROM '"$IMAGE_REF"'|' binder/Dockerfile
-          echo "Updated FROM in binder/Dockerfile to $IMAGE_REF"
+        if [ -f binder/Dockerfile.ci.bak ]; then
+          mv -f binder/Dockerfile.ci.bak binder/Dockerfile
         else
           echo "# Github Action Built Image" > binder/Dockerfile
           echo "FROM $IMAGE_REF" >> binder/Dockerfile
-          # Optionally add COPY lines if you want to scaffold here
-          echo "Created binder/Dockerfile with FROM $IMAGE_REF"
         fi
+        # Replace only the first FROM line with the new image ref
+        sed -E -i '1,/^FROM / s|^FROM .*$|FROM '"$IMAGE_REF"'|' binder/Dockerfile
+        echo "Updated FROM in binder/Dockerfile to $IMAGE_REF"
 
     - name: Commit binder/Dockerfile
       uses: EndBug/add-and-commit@v9
