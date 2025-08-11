@@ -1,2 +1,2 @@
 # Github Action Built Image
-FROM milysun/ldaca-app:b557c14c7b9d
+FROM milysun/ldaca-app:d3d35d64a858
