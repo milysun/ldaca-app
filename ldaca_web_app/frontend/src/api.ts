@@ -282,15 +282,20 @@ export async function deleteNode(
 }
 
 export async function renameNode(
-  workspaceId: string, 
-  nodeId: string, 
+  workspaceId: string,
+  nodeId: string,
   newName: string,
   authHeaders: Record<string, string> = {}
 ) {
-  const res = await axios.put(`${API_BASE}/workspaces/${workspaceId}/nodes/${nodeId}/name`, null, {
-    headers: authHeaders,
-    params: { new_name: newName }
-  });
+  // RESTful endpoint only
+  const res = await axios.put(
+    `${API_BASE}/workspaces/${workspaceId}/nodes/${nodeId}/name`,
+    null,
+    {
+      headers: authHeaders,
+      params: { new_name: newName },
+    }
+  );
   return res.data;
 }
 
@@ -468,6 +473,23 @@ export async function convertToLazyFrame(
     null,
     {
       headers: authHeaders
+    }
+  );
+  return res.data;
+}
+
+export async function resetDocumentColumn(
+  workspaceId: string,
+  nodeId: string,
+  documentColumn?: string,
+  authHeaders: Record<string, string> = {}
+) {
+  const res = await axios.post(
+    `${API_BASE}/workspaces/${workspaceId}/nodes/${nodeId}/reset-document`,
+    null,
+    {
+      params: documentColumn ? { document_column: documentColumn } : {},
+      headers: authHeaders,
     }
   );
   return res.data;
