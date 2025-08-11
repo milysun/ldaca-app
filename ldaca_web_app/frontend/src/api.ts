@@ -1,31 +1,25 @@
 import axios from 'axios';
 
-// Determine API base URL based on current hostname and environment
+// Determine API base URL based on current environment (JupyterHub/Binder aware)
 const getApiBase = () => {
-  const hostname = window.location.hostname;
-  const origin = window.location.origin;
-  
-  console.log('API Detection:', {
-    hostname,
-    origin,
-    NODE_ENV: process.env.NODE_ENV,
-    port: window.location.port
-  });
-  
-  // If accessing through ldaca.sguo.org, use the /api proxy path
-  if (hostname === 'ldaca.sguo.org') {
-    return `${origin}/api`;
-  }
-  
-  // If localhost with port 3000, use direct backend connection
-  if (hostname === 'localhost' && window.location.port === '3000') {
+  if (typeof window === 'undefined') return '/api';
+
+  const { origin, hostname, port, pathname } = window.location;
+
+  // Local dev: CRA (3000) or Vite (5173) connects directly to backend 8001
+  if (hostname === 'localhost' && (port === '3000' || port === '5173')) {
     return 'http://localhost:8001/api';
   }
-  
-  // Default fallback
-  return process.env.NODE_ENV === 'production' 
-    ? `${origin}/api`
-    : 'http://localhost:8001/api';
+
+  // JupyterHub/Binder: preserve any base (/user/<name>/) and rewrite the proxied frontend port to backend 8001
+  const m = pathname.match(/^(.*\/proxy\/)(\d+)(\/|$)/);
+  if (m) {
+    const prefix = m[1]; // e.g. /user/abc/proxy/
+    return `${origin}${prefix}8001/api`;
+  }
+
+  // Fallback to same-origin /api
+  return `${origin}/api`;
 };
 
 const API_BASE = getApiBase();
