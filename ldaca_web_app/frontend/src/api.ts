@@ -1,36 +1,41 @@
 import axios from 'axios';
 
-// Determine API base URL based on current hostname and environment
+// Determine API base URL based on current environment and JupyterHub proxy
 const getApiBase = () => {
-  const hostname = window.location.hostname;
-  const origin = window.location.origin;
-  
-  console.log('API Detection:', {
-    hostname,
-    origin,
-    NODE_ENV: process.env.NODE_ENV,
-    port: window.location.port
-  });
-  
-  // If accessing through ldaca.sguo.org, use the /api proxy path
-  if (hostname === 'ldaca.sguo.org') {
-    return `${origin}/api`;
-  }
-  
-  // If localhost with port 3000, use direct backend connection
-  if (hostname === 'localhost' && window.location.port === '3000') {
+  const { origin, hostname, pathname, port } = window.location;
+
+  // Local CRA dev server
+  if (hostname === 'localhost' && port === '3000') {
     return 'http://localhost:8001/api';
   }
-  
-  // Default fallback
-  return process.env.NODE_ENV === 'production' 
-    ? `${origin}/api`
-    : 'http://localhost:8001/api';
+
+  // If served behind JupyterHub, the frontend is under .../<service-prefix>/proxy/8080/
+  // Build a base that points to the backend under the same service prefix: .../proxy/8001/
+  // We avoid hard-coding the full hub path by staying relative to the current location.
+  try {
+    // Find the proxy segment in the current path if present
+    const parts = pathname.split('/').filter(Boolean);
+    const proxyIdx = parts.findIndex(p => p === 'proxy');
+    if (proxyIdx !== -1 && parts.length > proxyIdx + 1) {
+      // Replace the current proxied port with 8001 for backend API
+      const newParts = parts.slice(0);
+      // Ensure we have a numeric port after 'proxy'
+      const currentPort = newParts[proxyIdx + 1];
+      if (/^\d+$/.test(currentPort)) {
+        newParts[proxyIdx + 1] = '8001';
+        const basePath = '/' + newParts.join('/') + '/';
+        return `${origin}${basePath}api`;
+      }
+    }
+  } catch (e) {
+    // fall through to defaults
+  }
+
+  // Generic production: assume nginx proxies /api to backend when not on JupyterHub
+  return `${origin}/api`;
 };
 
 const API_BASE = getApiBase();
-
-console.log('Final API_BASE:', API_BASE);
 
 export interface GoogleAuthRequest {
   id_token: string;
