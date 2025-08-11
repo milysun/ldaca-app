@@ -34,7 +34,8 @@ if [ -f "ldaca_web_app/frontend/package.json" ]; then
   else
     npm install
   fi
-  CI=false npm run build
+  # Set PUBLIC_URL so CRA emits relative asset URLs (static/js, not /static/js)
+  CI=false PUBLIC_URL=. npm run build
   popd
   # Copy build to user-space web dir for nginx
   mkdir -p "$HOME/www"
