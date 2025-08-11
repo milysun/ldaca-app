@@ -10,6 +10,21 @@ cd "$(dirname "$0")/.."
 #   pip install -e ldaca_web_app/backend
 # fi
 
+# Install local Python libraries into site-packages (non-editable) to bake them into the image
+if [ -f "docframe/pyproject.toml" ]; then
+  python -m pip install ./docframe
+fi
+if [ -f "docworkspace/pyproject.toml" ]; then
+  python -m pip install ./docworkspace
+fi
+
+# Ensure backend .env exists by copying from example if present (non-interactive)
+if [ -d "ldaca_web_app/backend" ]; then
+  if [ ! -f "ldaca_web_app/backend/.env" ] && [ -f "ldaca_web_app/backend/.env.example" ]; then
+    cp "ldaca_web_app/backend/.env.example" "ldaca_web_app/backend/.env"
+  fi
+fi
+
 # Build frontend if present
 if [ -f "ldaca_web_app/frontend/package.json" ]; then
   pushd ldaca_web_app/frontend
