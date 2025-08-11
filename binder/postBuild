@@ -29,7 +29,7 @@ fi
 if [ -f "ldaca_web_app/frontend/package.json" ]; then
   pushd ldaca_web_app/frontend
   # Use npm ci only when a lockfile exists, else fallback to npm install
-  if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+  if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ] || [ -f pnpm-lock.yaml ] || [ -f yarn.lock ]; then
     npm ci || npm install
   else
     npm install
