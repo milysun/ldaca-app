@@ -47,7 +47,7 @@ else
 <html><head><meta charset="utf-8"/><title>LDaCA</title></head>
 <body>
 <h2>LDaCA Frontend not built</h2>
-<p>API docs: <a href="/proxy/8080/api/docs">/proxy/8080/api/docs</a></p>
+<p>API docs: <a href="/proxy/3000/api/docs">/proxy/3000/api/docs</a></p>
 </body></html>
 HTML
 fi
@@ -84,7 +84,7 @@ http {
   keepalive_timeout  65;
 
   server {
-    listen 8080;
+    listen 3000;
     server_name _;
 
     root   www;

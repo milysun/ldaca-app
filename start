@@ -3,7 +3,7 @@ set -euo pipefail
 
 # User-space startup script for Binder (repo root)
 # - Starts FastAPI backend (uvicorn) on 127.0.0.1:8001
-# - Starts nginx serving frontend on 8080 and proxying /api -> 8001
+# - Starts nginx serving frontend on 3000 and proxying /api -> 8001
 # - Delegates to Jupyter singleuser process provided by Binder
 
 # Ensure working directory is repo root
@@ -69,7 +69,7 @@ http {
   keepalive_timeout  65;
 
   server {
-    listen 8080;
+    listen 3000;
     server_name _;
 
     root   www;
@@ -112,11 +112,11 @@ NGINX
   mkdir -p "$HOME/nginx/www"
   cp -r "$HOME/www"/* "$HOME/nginx/www/" 2>/dev/null || true
 
-  echo "Starting nginx ($NGINX_BIN) on 8080 (prefix $HOME/nginx)"
+  echo "Starting nginx ($NGINX_BIN) on 3000 (prefix $HOME/nginx)"
   "$NGINX_BIN" -p "$HOME/nginx" -c "$HOME/nginx/nginx.conf" &
   echo $! > "$HOME/nginx.pid"
 else
-  echo "Warning: nginx binary not found; frontend proxy on /proxy/8080/ will not be available." >&2
+  echo "Warning: nginx binary not found; frontend proxy on /proxy/3000/ will not be available." >&2
 fi
 
 # If no args were provided (manual run), default to jupyter notebook
